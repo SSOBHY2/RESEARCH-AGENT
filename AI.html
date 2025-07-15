@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Elsayed's Personal Agent</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f6f7f8; margin: 20px; color: #333; }
+    .container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h1 { font-family: 'Brush Script MT', cursive; font-size: 48px; text-align: center; color: #2c3e50; }
+    h2, h4 { color: #34495e; }
+    textarea, input[type="text"] { width: 100%; box-sizing: border-box; height: 100px; margin: 10px 0; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    input[type="text"] { height: auto; }
+    button { padding: 12px 25px; font-size: 16px; cursor: pointer; background-color: #3498db; color: white; border: none; border-radius: 4px; transition: background-color 0.3s; margin-top: 5px; margin-right: 10px; }
+    button:hover { background-color: #2980b9; }
+    button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+    .download-btn { background-color: #27ae60; }
+    .download-btn:hover { background-color: #229954; }
+    .title-btn { background-color: #9b59b6; margin-bottom: 10px; }
+    .title-btn:hover { background-color: #8e44ad; }
+    #output, #imageOutput, #combineOutput, #augmentOutput, #reviseOutput { border: 1px solid #ddd; padding: 15px; margin-top: 10px; white-space: pre-wrap; background-color: #fdfdfd; min-height: 100px; line-height: 1.6; }
+    .input-group, .output-actions { margin-bottom: 15px; }
+    hr { border: 0; height: 1px; background: #ddd; margin: 40px 0; }
+    .progress-bar { display: none; margin-top: 10px; padding: 10px; background-color: #ecf0f1; border-radius: 4px; text-align: center; color: #2c3e50; font-weight: bold; }
+    .hidden { display: none; }
+    .highlight { background-color: #FFF9C4; padding: 1px 3px; border-radius: 3px; border-bottom: 1px solid #FFEB3B; }
+    .source1 { background-color: #FFF9C4; padding: 1px 3px; border-radius: 3px; }
+    .source2 { background-color: #B3E5FC; padding: 1px 3px; border-radius: 3px; }
+    .source3 { background-color: #C8E6C9; padding: 1px 3px; border-radius: 3px; }
+    .highlight-key { border: 1px solid #eee; padding: 10px 15px; margin-bottom: 20px; border-radius: 4px; background-color: #fcfcfc; }
+    .highlight-key h4 { margin-top: 0; margin-bottom: 8px; }
+    .highlight-key p { margin: 4px 0; display: flex; align-items: center; }
+    .highlight-key .key-color { display: inline-block; width: 16px; height: 16px; margin-right: 8px; border-radius: 3px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Elsayed's Personal Agent</h1>
+
+    <!-- TEXT-BASED TOPIC RESEARCH GENERATOR -->
+    <h2>Text-Based Research Prompt</h2>
+    <textarea id="topicInput" placeholder="Enter your research topic..."></textarea>
+    <div class="output-actions"><button id="generatePaperBtn" onclick="generatePaper()">Generate Paper</button></div>
+    <div id="progressText" class="progress-bar"></div>
+    <div id="output">The generated research paper will appear here...</div>
+    <div class="output-actions"><button id="downloadTextBtn" class="download-btn hidden" onclick="downloadWord('output')">Download Paper</button></div>
+
+    <hr>
+
+    <!-- IMAGE-BASED DIAGRAM GENERATOR -->
+    <h2>Diagram-Based Research Prompt</h2>
+    <div class="input-group"><h4>Attach Primary Diagram/Model Image (Mandatory)</h4><input type="file" id="diagramInput" /></div>
+    <div class="input-group"><h4>Attach Results/Data Image (Optional)</h4><input type="file" id="resultsInput" /></div>
+    <div class="input-group"><h4>Define Field Area (Mandatory)</h4><textarea id="fieldAreaInput" placeholder="Example: restaurants in Riyadh..."></textarea></div>
+    <div class="input-group"><h4>Provide Guidance (Optional)</h4><textarea id="guidanceInput" placeholder="Guide the AI's focus..."></textarea></div>
+    <div class="output-actions"><button id="suggestTitlesBtn" onclick="suggestTitles()">Suggest Titles</button></div>
+    <div id="titleSuggestions" class="input-group" style="margin-top: 20px;"></div>
+    <div id="progressImage" class="progress-bar"></div>
+    <div id="imageOutput"></div>
+    <div class="output-actions"><button id="downloadImageBtn" class="download-btn hidden" onclick="downloadWord('imageOutput')">Download Paper</button></div>
+
+    <hr>
+    
+    <h2>Initial Draft of the Paper</h2>
+    <p>Upload three existing papers and provide a title. The AI will combine them into a single, referenced draft.</p>
+    <div class="input-group"><h4>Paper Title (Mandatory)</h4><input type="text" id="combineTitleInput" placeholder="Enter the exact title for the combined paper..."></div>
+    <div class="input-group"><h4>Insert First Paper</h4><input type="file" id="paper1Input" accept=".txt,.docx,.pdf"></div>
+    <div class="input-group"><h4>Insert Second Paper</h4><input type="file" id="paper2Input" accept=".txt,.docx,.pdf"></div>
+    <div class="input-group"><h4>Insert Third Paper</h4><input type="file" id="paper3Input" accept=".txt,.docx,.pdf"></div>
+    <div class="output-actions"><button id="combinePapersBtn" onclick="combinePapers()">Combine Papers</button></div>
+    <div id="progressCombine" class="progress-bar"></div>
+    <div id="combineOutput">The combined paper will appear here...</div>
+    <div class="output-actions"><button id="downloadCombineBtn" class="download-btn hidden" onclick="downloadWord('combineOutput')">Download Combined</button></div>
+
+    <hr>
+
+    <h2>Augment Existing Paper with New Sources</h2>
+    <p>Upload a base paper and 1-3 source papers. The AI will insert relevant statements from the source papers into the base paper, up until the 'Discussion' section.</p>
+    <div class="input-group"><h4>Base Paper (Mandatory)</h4><input type="file" id="basePaperInput" accept=".txt,.docx,.pdf"></div>
+    <div class="input-group"><h4>Source Paper 1 (At least one is required)</h4><input type="file" id="sourcePaper1Input" accept=".txt,.docx,.pdf"></div>
+    <div class="input-group"><h4>Source Paper 2 (Optional)</h4><input type="file" id="sourcePaper2Input" accept=".txt,.docx,.pdf"></div>
+    <div class="input-group"><h4>Source Paper 3 (Optional)</h4><input type="file" id="sourcePaper3Input" accept=".txt,.docx,.pdf"></div>
+    <div class="output-actions"><button id="augmentPaperBtn" onclick="augmentPaper()">Augment Paper</button></div>
+    <div id="progressAugment" class="progress-bar"></div>
+    <div id="augmentOutput">The augmented paper will appear here...</div>
+    <div class="output-actions"><button id="downloadAugmentBtn" class="download-btn hidden" onclick="downloadWord('augmentOutput')">Download Augmented</button></div>
+
+    <hr>
+    
+    <h2>Grammar & Reference Check</h2>
+    <p>Upload a paper (.docx, .pdf, or .txt) to correct grammar and validate references.</p>
+    <div class="input-group"><h4>Upload Paper (Mandatory)</h4><input type="file" id="reviseInput" accept=".txt,.docx,.pdf" /></div>
+    <div class="output-actions"><button id="revisePaperBtn" onclick="revisePaper()">Revise Paper</button></div>
+    <div id="progressRevise" class="progress-bar"></div>
+    <div id="reviseOutput">The revised paper will appear here...</div>
+    <div class="output-actions"><button id="downloadRevisedBtn" class="download-btn hidden" onclick="downloadWord('reviseOutput')">Download Revised</button></div>
+
+    <hr>
+    
+    <h2>Research Paper Summary Table</h2>
+    <p>Upload a research paper to generate a comprehensive summary table with key information extracted and organized.</p>
+    <div class="input-group"><h4>Upload Research Paper (Mandatory)</h4><input type="file" id="summaryTableInput" accept=".txt,.docx,.pdf" /></div>
+    <div class="output-actions"><button id="generateTableBtn" onclick="generateSummaryTable()">Generate Summary Table</button></div>
+    <div id="progressTable" class="progress-bar"></div>
+    <div id="tableOutput">The summary table will appear here...</div>
+    <div class="output-actions"><button id="downloadTableBtn" class="download-btn hidden" onclick="downloadWord('tableOutput')">Download Table</button></div>
+  </div>
+
+  <script>
+    let storedPaperData = null;
+
+    async function handleStream(url, options, outputBoxId, progressBoxId, generateBtnId, downloadBtnId) {
+      const outputBox = document.getElementById(outputBoxId);
+      const progressBox = document.getElementById(progressBoxId);
+      const generateBtn = document.getElementById(generateBtnId);
+      const downloadBtn = document.getElementById(downloadBtnId);
+      const originalButtonText = generateBtn.textContent;
+      
+      outputBox.innerHTML = "";
+      progressBox.style.display = 'block';
+      progressBox.textContent = 'Initializing...';
+      downloadBtn.classList.add('hidden');
+      generateBtn.textContent = 'Generating...';
+      generateBtn.disabled = true;
+
+      try {
+        const response = await fetch(url, options);
+        if (!response.ok) { 
+            const errText = await response.text();
+            try { const err = JSON.parse(errText); throw new Error(err.error || `HTTP error! status: ${response.status}`); } 
+            catch { throw new Error(errText || `HTTP error! status: ${response.status}`); }
+        }
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder(); let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read(); if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n'); buffer = lines.pop();
+          for (const line of lines) {
+            if (line.startsWith('data:')) {
+              try {
+                const jsonStr = line.substring(5).trim();
+                if (jsonStr) {
+                  const data = JSON.parse(jsonStr);
+                  if (data.type === 'progress') { progressBox.textContent = data.message;
+                  } else if (data.type === 'section') { outputBox.innerHTML += data.content;
+                  } else if (data.type === 'final_title') { outputBox.insertAdjacentHTML('afterbegin', data.content);
+                  } else if (data.type === 'done') {
+                    progressBox.textContent = 'Generation Complete!';
+                    setTimeout(() => { progressBox.style.display = 'none'; }, 2000);
+                    downloadBtn.classList.remove('hidden');
+                    generateBtn.textContent = originalButtonText.includes("Suggest") ? "Suggest New Titles" : originalButtonText;
+                    generateBtn.disabled = false;
+                  }
+                }
+              } catch (e) { console.error("Failed to parse JSON line:", line, e); }
+            }
+          }
+        }
+      } catch (error) {
+        progressBox.style.display = 'none';
+        outputBox.innerHTML = `An error occurred: ${error.message}`;
+        generateBtn.textContent = originalButtonText;
+        generateBtn.disabled = false;
+      }
+    }
+
+    function revisePaper() {
+        const paperFile = document.getElementById("reviseInput").files[0];
+        const outputBox = document.getElementById("reviseOutput");
+        if (!paperFile) { outputBox.innerHTML = "Please upload a paper to revise."; return; }
+        const formData = new FormData();
+        formData.append("paper", paperFile);
+        handleStream("/revise_paper", { method: 'POST', body: formData }, "reviseOutput", "progressRevise", "revisePaperBtn", "downloadRevisedBtn");
+    }
+
+    function combinePapers() {
+        const paper1 = document.getElementById("paper1Input").files[0];
+        const paper2 = document.getElementById("paper2Input").files[0];
+        const paper3 = document.getElementById("paper3Input").files[0];
+        const chosenTitle = document.getElementById("combineTitleInput").value;
+        const outputBox = document.getElementById("combineOutput");
+        if (!chosenTitle.trim()) { outputBox.innerHTML = "The 'Paper Title' is mandatory."; return; }
+        if (!paper1 || !paper2 || !paper3) { outputBox.innerHTML = "Please upload all three papers."; return; }
+        const formData = new FormData();
+        formData.append("paper1", paper1);
+        formData.append("paper2", paper2);
+        formData.append("paper3", paper3);
+        formData.append("chosenTitle", chosenTitle);
+        handleStream("/combine_papers", { method: 'POST', body: formData }, "combineOutput", "progressCombine", "combinePapersBtn", "downloadCombineBtn");
+    }
+
+    function augmentPaper() {
+        const basePaper = document.getElementById("basePaperInput").files[0];
+        const source1 = document.getElementById("sourcePaper1Input").files[0];
+        const source2 = document.getElementById("sourcePaper2Input").files[0];
+        const source3 = document.getElementById("sourcePaper3Input").files[0];
+        const outputBox = document.getElementById("augmentOutput");
+        if (!basePaper) { outputBox.innerHTML = "A 'Base Paper' is mandatory."; return; }
+        if (!source1 && !source2 && !source3) { outputBox.innerHTML = "You must provide at least one 'Source Paper'."; return; }
+        const formData = new FormData();
+        formData.append("base_paper", basePaper);
+        if (source1) formData.append("source_paper_1", source1);
+        if (source2) formData.append("source_paper_2", source2);
+        if (source3) formData.append("source_paper_3", source3);
+        handleStream("/augment_paper", { method: 'POST', body: formData }, "augmentOutput", "progressAugment", "augmentPaperBtn", "downloadAugmentBtn");
+    }
+
+    function suggestTitles() {
+      const diagramImage = document.getElementById("diagramInput").files[0];
+      const fieldArea = document.getElementById("fieldAreaInput").value;
+      const outputBox = document.getElementById("imageOutput");
+      const titleBox = document.getElementById("titleSuggestions");
+      const suggestBtn = document.getElementById("suggestTitlesBtn");
+      if (!fieldArea.trim()) { outputBox.innerHTML = "The 'Field Area' is mandatory."; return; }
+      if (!diagramImage) { outputBox.innerHTML = "The 'Primary Diagram/Model Image' is mandatory."; return; }
+      outputBox.innerHTML = "";
+      titleBox.innerHTML = "<i>Analyzing inputs and generating title suggestions...</i>";
+      suggestBtn.disabled = true; suggestBtn.textContent = 'Analyzing...';
+      document.getElementById("downloadImageBtn").classList.add('hidden');
+      const formData = new FormData();
+      formData.append("diagramImage", diagramImage);
+      formData.append("resultsImage", document.getElementById("resultsInput").files[0]);
+      formData.append("fieldArea", fieldArea);
+      formData.append("guidance", document.getElementById("guidanceInput").value);
+      fetch("/suggest_titles", { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) { titleBox.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`; return; }
+            storedPaperData = data;
+            titleBox.innerHTML = '<h4>Please choose a title to continue:</h4>';
+            data.titles.forEach(title => {
+                const btn = document.createElement('button');
+                btn.textContent = title;
+                btn.className = 'title-btn';
+                btn.onclick = () => startFullGeneration(title);
+                titleBox.appendChild(btn);
+            });
+        })
+        .catch(err => { titleBox.innerHTML = `<p style="color: red;">An error occurred: ${err.message}</p>`; })
+        .finally(() => { suggestBtn.disabled = false; suggestBtn.textContent = 'Suggest Titles'; });
+    }
+
+    function startFullGeneration(chosenTitle) {
+      if (!storedPaperData) { document.getElementById("imageOutput").innerHTML = "Error: Stored data not found."; return; }
+      storedPaperData.chosenTitle = chosenTitle;
+      const options = { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(storedPaperData) };
+      handleStream("/generate_from_image", options, "imageOutput", "progressImage", "suggestTitlesBtn", "downloadImageBtn");
+      document.getElementById("titleSuggestions").innerHTML = '';
+    }
+
+    function generatePaper() {
+      const topic = document.getElementById("topicInput").value;
+      if (!topic.trim()) { document.getElementById("output").innerHTML = "Topic is required."; return; }
+      handleStream("/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ topic: topic }) }, "output", "progressText", "generatePaperBtn", "downloadTextBtn");
+    }
+
+    function downloadWord(outputBoxId) {
+        fetch('/download_word', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({html_content: document.getElementById(outputBoxId).innerHTML})})
+        .then(res => res.blob()).then(blob => {
+            const url = window.URL.createObjectURL(blob); const a = document.createElement('a');
+            a.style.display = 'none'; a.href = url; a.download = 'research_paper.docx';
+            document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(url);
+        }).catch(err => console.error('Download error:', err));
+    }
+
+    function generateSummaryTable() {
+        const paperFile = document.getElementById("summaryTableInput").files[0];
+        const outputBox = document.getElementById("tableOutput");
+        if (!paperFile) { 
+            outputBox.innerHTML = "Please upload a research paper to generate the summary table."; 
+            return; 
+        }
+        const formData = new FormData();
+        formData.append("paper", paperFile);
+        handleStream("/generate_summary_table", { method: 'POST', body: formData }, "tableOutput", "progressTable", "generateTableBtn", "downloadTableBtn");
+    }
+  </script>
+</body>
+</html>
